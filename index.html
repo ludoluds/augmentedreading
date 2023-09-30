@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+   <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+   <title>Augmented Reading</title>
+   <style>
+      body {
+         font-family: "Roboto", sans-serif
+      }
+
+      .hidden {
+         display: none;
+      }
+   </style>
+</head>
+
+<body>
+   <div class="w3-content" style="max-width:2000px;margin-top:46px">
+      <div class="w3-container w3-content w3-center w3-padding-64" style="max-width:800px">
+         <textarea id="inputTxtArea" placeholder="Copy some text for Augmented Reading"
+            class="w3-block is-visible"></textarea>
+
+         <button id="btnDoIt" class="w3-button w3-black w3-margin-top w3-margin-bottom">Do it</button>
+         <p id="resultContainer" class="w3-justify w3-xlarge hidden"></p>
+      </div>
+   </div>
+
+   <script>
+      const $btnDoIt = $("#btnDoIt");
+      const entityMap = {
+         '&': '&amp;',
+         '<': '&lt;',
+         '>': '&gt;',
+         '"': '&quot;',
+         "'": '&#39;',
+         '/': '&#x2F;',
+         '`': '&#x60;',
+         '=': '&#x3D;'
+      };
+
+      const escapeHtml = (string) => {
+         return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+            return entityMap[s];
+         });
+      }
+
+      $(document).ready(function () {
+         $btnDoIt.click(function () {
+            doIt();
+         });
+      });
+
+      const doIt = () => {
+         const $inputElmt = $("#inputTxtArea");
+         const $resultElmt = $("#resultContainer");
+
+         if (!$resultElmt.is(':visible')) {
+            let res = "";
+            let text = escapeHtml($inputElmt.val());
+
+            text = text.replace(/[\n\n\r]/g, '-=!%').replace(/\s+/g, ' ').replace(/(-=!%\s*)+/g, ' -=!% ');
+
+            text.split(' ').forEach((w) => {
+               if (w == '-=!%') {
+                  res += `<br />`;
+               } else {
+                  const word = w.trim();
+                  const mid = Math.ceil(word.length / 2);
+                  const left = word.slice(0, mid);
+                  const right = word.slice(mid);
+                  res += `<strong>${left}</strong>${right} `;
+               }
+
+            })
+
+            $resultElmt.html(res);
+
+            $inputElmt.slideUp();
+            $resultElmt.slideDown();
+            $btnDoIt.text('Do It Again');
+
+         } else {
+            // $inputElmt.val('');
+            $resultElmt.slideUp();
+            $inputElmt.slideDown();
+            $btnDoIt.text('Do It');
+         }
+      }
+
+   </script>
+</body>
+
+</html>
