@@ -2,100 +2,120 @@
 <html lang="en">
 
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1">
-   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-   <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-   <title>Augmented Reading</title>
-   <style>
-      body {
-         font-family: "Roboto", sans-serif
-      }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <title>Augmented Reading</title>
+    <style>
+        body {
+            font-family: "Roboto", sans-serif
+        }
 
-      .hidden {
-         display: none;
-      }
-   </style>
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 
-<body>    
-   <div class="w3-content" style="max-width:2000px">      
-      <div class="w3-container w3-content w3-center" style="max-width:800px">
-         <h1>Augmented Reading</h1>
-         <textarea id="inputTxtArea" placeholder="Copy some text for Augmented Reading"
-            class="w3-block is-visible"></textarea>
+<body>
+    <div class="w3-content" style="max-width:2000px">
+        <div class="w3-container w3-content w3-center" style="max-width:800px">
+            <h1>Augmented Reading</h1>
+            <textarea id="inputTxtArea" placeholder="Copy some text for Augmented Reading"
+                class="w3-block is-visible"></textarea>
 
-         <button id="btnDoIt" class="w3-button w3-black w3-margin-top w3-margin-bottom">Do it</button>
-         <p id="resultContainer" class="w3-justify w3-xlarge hidden"></p>
-      </div>
-   </div>
+            <button id="copyCb" class="w3-button w3-black w3-margin-top w3-margin-bottom">Copy From Clipboard</button>
+            <button id="btnDoIt" class="w3-button w3-black w3-margin-top w3-margin-bottom">Do it</button>
+            <p id="resultContainer" class="w3-justify w3-large hidden"></p>
+        </div>
+    </div>
 
-   <script>
-      const $btnDoIt = $("#btnDoIt");
-      const entityMap = {
-         '&': '&amp;',
-         '<': '&lt;',
-         '>': '&gt;',
-         '"': '&quot;',
-         "'": '&#39;',
-         '/': '&#x2F;',
-         '`': '&#x60;',
-         '=': '&#x3D;'
-      };
+    <script>
+        const $btnDoIt = $("#btnDoIt");
+        const $btnCopy = $("#copyCb");
+        const entityMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+            '/': '&#x2F;',
+            '`': '&#x60;',
+            '=': '&#x3D;'
+        };
 
-      const escapeHtml = (string) => {
-         return String(string).replace(/[&<>"'`=\/]/g, function (s) {
-            return entityMap[s];
-         });
-      }
+        const escapeHtml = (string) => {
+            return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+                return entityMap[s];
+            });
+        }
 
-      $(document).ready(function () {
-         $btnDoIt.click(function () {
-            doIt();
-         });
-      });
+        $(document).ready(function () {
+            $btnDoIt.click(function () {
+                doIt();
+            });
 
-      const doIt = () => {
-         const $inputElmt = $("#inputTxtArea");
-         const $resultElmt = $("#resultContainer");
+            $btnCopy.click(function () {
+                copyClipboardToInput();                
+            });
+        });
 
-         if (!$resultElmt.is(':visible')) {
-            let res = "";
-            let text = escapeHtml($inputElmt.val());
 
-            text = text.replace(/[\n\n\r]/g, '-=!%').replace(/\s+/g, ' ').replace(/(-=!%\s*)+/g, ' -=!% ');
+        const copyClipboardToInput = () => {
+            console.log('cpy');
+            navigator.clipboard
+                .readText()
+                .then(
+                    (txt) => {
+                        console.log(txt);
+                        $("#inputTxtArea").val(txt);
 
-            text.split(' ').forEach((w) => {
-               if (w == '-=!%') {
-                  res += `<br />`;
-               } else {
-                  const word = w.trim();
-                  const mid = Math.ceil(word.length / 2);
-                  const left = word.slice(0, mid);
-                  const right = word.slice(mid);
-                  res += `<strong>${left}</strong>${right} `;
-               }
+                    }
+                );
+        }
 
-            })
+        const doIt = () => {
+            const $inputElmt = $("#inputTxtArea");
+            const $resultElmt = $("#resultContainer");
 
-            $resultElmt.html(res);
+            if (!$resultElmt.is(':visible')) {
+                let res = "";
+                let text = escapeHtml($inputElmt.val());
 
-            $inputElmt.slideUp();
-            $resultElmt.slideDown();
-            $btnDoIt.text('Do It Again');
+                text = text.replace(/[\n\n\r]/g, '-=!%').replace(/\s+/g, ' ').replace(/(-=!%\s*)+/g, ' -=!% ');
 
-         } else {
-            $inputElmt.val('');
-            $resultElmt.slideUp();
-            $inputElmt.slideDown();
-            $btnDoIt.text('Do It');
-         }
-      }
+                text.split(' ').forEach((w) => {
+                    if (w == '-=!%') {
+                        res += `<br />`;
+                    } else {
+                        const word = w.trim();
+                        const mid = Math.ceil(word.length / 2);
+                        const left = word.slice(0, mid);
+                        const right = word.slice(mid);
+                        res += `<strong>${left}</strong>${right} `;
+                    }
 
-   </script>
+                })
+
+                $resultElmt.html(res);
+
+                $inputElmt.slideUp();
+                $resultElmt.slideDown();
+                $btnDoIt.text('Do It Again');
+
+            } else {
+                $inputElmt.val('');
+                $resultElmt.slideUp();
+                $inputElmt.slideDown();
+                $btnDoIt.text('Do It');
+            }
+        }
+
+    </script>
 </body>
 
 </html>
